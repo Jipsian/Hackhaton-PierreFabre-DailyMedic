@@ -1,10 +1,10 @@
 angular.module('app', ['ngRoute'])
         .factory('sessionFactory', sessionFactory)
-        .service('userPatientService', userPatientService)
+        .service('userService', userService)
         .service('todoService', todoService)
         .controller('mainController', mainController)
         .controller('navbarController', navbarController)
-        .controller('loginPatientController', loginPatientController)
+        .controller('loginController', loginController)
         .config(routes)
         .run(loginStatus)
         ;

@@ -11,7 +11,7 @@ const routes = ($routeProvider, $httpProvider) => {
         })
         .when('/login', {
             templateUrl: 'views/login.html',
-            controller: 'loginPatientController',
+            controller: 'loginController',
             controllerAs: 'vm'
         })
         .otherwise({
@@ -25,7 +25,7 @@ const routes = ($routeProvider, $httpProvider) => {
                 config.headers = config.headers || {};
                 if ($window.localStorage.token) {
                     sessionFactory.token = $window.localStorage.token
-                    sessionFactory.userPatient = JSON.parse($window.localStorage.getItem('currentUser'));
+                    sessionFactory.user = JSON.parse($window.localStorage.getItem('currentUser'));
                     config.headers.authorization = $window.localStorage.token
                 }
                 return config
@@ -45,11 +45,11 @@ const routes = ($routeProvider, $httpProvider) => {
 const loginStatus = ($rootScope, $window, sessionFactory) => {
 
     if ($window.localStorage.currentUser) {
-        sessionFactory.userPatient = JSON.parse($window.localStorage.getItem('currentUser'));
+        sessionFactory.user = JSON.parse($window.localStorage.getItem('currentUser'));
     }
 
     $rootScope.$on('loginStatusChanged', (event, isLogged) => {
-        $window.localStorage.setItem('currentUser', JSON.stringify(sessionFactory.userPatient));
+        $window.localStorage.setItem('currentUser', JSON.stringify(sessionFactory.user));
         $window.localStorage.token = sessionFactory.token;
         sessionFactory.isLogged = isLogged;
     })
