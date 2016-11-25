@@ -1,20 +1,20 @@
 import jsonwebtoken from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
-import token from '../../token.js';
+import tokenPatient from '../../token.js';
 
 const hashCode = (s) => s.split("").reduce((a, b) => {
     a = ((a << 5) - a) + b.charCodeAt(0);
     a & a
 }, 0);
 
-const userSchema = new mongoose.Schema({
+const userPatientSchema = new mongoose.Schema({
     email: {
         type: String,
         required: true,
         required: 'Email address is required',
         validate: [function(email) {
-            return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)
+            return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email);
         }, 'Please fill a valid email address'],
         match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please fill a valid email address'],
         unique: true
@@ -26,19 +26,32 @@ const userSchema = new mongoose.Schema({
     isAdmin: {
         type: Boolean,
         default: false
-    }
+    },
+    nom: String,
+    prenom: String,
+    age: String,
+    genre: String,
+    poids: String,
+    taille: String,
+    allergies: String,
+    grpSang: String,
+    autrepato: String,
+    medecinTrait: String,
+    adresse: String,
+    tel: String,
+    mail: String
 });
 
-userSchema.methods.comparePassword = function(pwd, cb) {
+userPatientSchema.methods.comparePassword = function(pwd, cb) {
     bcrypt.compare(pwd, this.password, function(err, isMatch) {
         if (err) cb(err);
         cb(null, isMatch);
     });
 };
 
-let model = mongoose.model('User', userSchema);
+let model = mongoose.model('userPatient', userPatientSchema);
 
-export default class User {
+export default class userPatient {
 
     connect(req, res) {
         if (!req.body.email) {
@@ -48,30 +61,30 @@ export default class User {
         } else {
             model.findOne({
                 email: req.body.email
-            }, (err, user) => {
-                if (err || !user) {
+            }, (err, userPatient) => {
+                if (err || !userPatient) {
                     res.sendStatus(403);
                 } else {
-                    user.comparePassword(req.body.password, (err, isMatch) => {
+                    userPatient.comparePassword(req.body.password, (err, isMatch) => {
                         if (err) {
                             res.status(400).send(err);
                         } else {
                             if (isMatch) {
-                                user.password = null;
-                                let tk = jsonwebtoken.sign(user, token, {
+                                userPatient.password = null;
+                                let tk = jsonwebtoken.sign(userPatient, tokenPatient, {
                                     expiresIn: "24h"
                                 });
                                 res.json({
                                     success: true,
-                                    user: user,
-                                    token: tk
+                                    userPatient: userPatient,
+                                    tokenPatient: tk
                                 });
                             } else {
                                 res.status(400).send('Incorrect password');
                             }
-                        };
+                        }
                     });
-                };
+                }
             });
         }
     }
@@ -79,11 +92,11 @@ export default class User {
     findAll(req, res) {
         model.find({}, {
             password: 0
-        }, (err, users) => {
-            if (err || !users) {
+        }, (err, usersPatient) => {
+            if (err || !usersPatient) {
                 res.sendStatus(403);
             } else {
-                res.json(users);
+                res.json(usersPatient);
             }
         });
     }
@@ -91,11 +104,11 @@ export default class User {
     findById(req, res) {
         model.findById(req.params.id, {
             password: 0
-        }, (err, user) => {
-            if (err || !user) {
+        }, (err, userPatient) => {
+            if (err || !userPatient) {
                 res.sendStatus(403);
             } else {
-                res.json(user);
+                res.json(userPatient);
             }
         });
     }
@@ -106,20 +119,20 @@ export default class User {
             req.body.password = bcrypt.hashSync(req.body.password, salt);
         }
         model.create(req.body,
-            (err, user) => {
-                if (err || !user) {
+            (err, userPatient) => {
+                if (err || !userPatient) {
                     if (err.code === 11000 || err.code === 11001) {
                         err.message = "Email " + req.body.email + " already exist";
                     }
                     res.status(500).send(err.message);
                 } else {
-                    let tk = jsonwebtoken.sign(user, token, {
+                    let tk = jsonwebtoken.sign(userPatient, tokenPatient, {
                         expiresIn: "24h"
                     });
                     res.json({
                         success: true,
-                        user: user,
-                        token: tk
+                        userPatient: userPatient,
+                        tokenPatient: tk
                     });
                 }
             });
@@ -128,17 +141,17 @@ export default class User {
     update(req, res) {
         model.update({
             _id: req.params.id
-        }, req.body, (err, user) => {
-            if (err || !user) {
+        }, req.body, (err, userPatient) => {
+            if (err || !userPatient) {
                 res.status(500).send(err.message);
             } else {
-                let tk = jsonwebtoken.sign(user, token, {
+                let tk = jsonwebtoken.sign(userPatient, tokenPatient, {
                     expiresIn: "24h"
                 });
                 res.json({
                     success: true,
-                    user: user,
-                    token: tk
+                    userPatient: userPatient,
+                    tokenPatient: tk
                 });
             }
         });
@@ -151,6 +164,6 @@ export default class User {
             } else {
                 res.sendStatus(200);
             }
-        })
+        });
     }
 }

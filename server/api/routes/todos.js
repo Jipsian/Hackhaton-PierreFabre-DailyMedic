@@ -20,4 +20,4 @@ module.exports = (app) => {
 
     app.use('/todos', Auth.hasAuthorization, router);
 
-}
+};

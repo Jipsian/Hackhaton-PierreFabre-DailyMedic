@@ -1,4 +1,4 @@
-function loginController(userService, sessionFactory, $timeout, $location, $rootScope) {
+function loginPatientController(userService, sessionFactory, $timeout, $location, $rootScope) {
 
     this.userService = userService;
     this.sessionFactory = sessionFactory;
